@@ -1,68 +1,76 @@
 
-# Social Media API
+<h1 align="center">
+<br>
+Twitter Bot
+</h1>
+
+<p align="center">conquer twitter</p>
+
+<hr />
+<br />
+
+
+## 📚 Project Definition
 
 Simple API for social media platform(currently only twitter is supported)
 
-  
 
-## Installation
+## 🛠️ Features
 
-1. create and configure .env.production / .env.development files (cp .env.example)
+Technologies used:
 
-2. configure database:
+- ⚛️ **Flask** — Python library
+- 🌐 **Docker** — Containerization
+- 📊 **PostgreSQL** - Database
 
-1. flask db init
 
-2. flask db migrate -m initial
+## 🚀 Getting started
 
-3. flask db upgrade
+- create and configure .env.production / .env.development files (cp .env.example)
 
-4. flask configure-db (all flask commands ar listed with : (venv) → <PROJECT_NAME>› flask)
+- configure database:
 
-  
+  1. flask db init
 
-## Deploy changes to production from local machine (if DB changes has been made)
+  2. flask db upgrade
 
-1. change .flaskenv to production
+  3. flask configure-db (all flask commands ar listed with : (venv) → <PROJECT_NAME>› flask)
 
-2. changex in /migrations folder: folder versions_prod to version
 
-3. check revisions to be added on production db with: <PROJECT_NAME>› flask db ...
+## 🔋 Commands
 
-4. flask db migrate -m <message>
+- check flask for more info
 
-5. flask db upgrade
 
-6. flask configure-db (commands are located in <PROJECT_ROOT>\app\commands.py)
+## 🌐 Docker development setup
 
-  
+- run docker-compose up -d inside root
+- 2 containers are created:
+  - app container
+  - database container
 
-## Commands
-
-  
-  
 
 ## Flask Migrate changes
 
-- \migrations\env.py
+- update file ```\migrations\env.py``` so the database will be created in a separate postgres schema (other than public)
+  
+```
+schema = current_app.config['DB_SCHEMA']
 
- . 
-    
-    schema = current_app.config['DB_SCHEMA']
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and object.schema != schema:
+        return False
+    else:
+        return True
 
-    def include_object(object, name, type_, reflected, compare_to):
-        if type_ == "table" and object.schema != schema:
-            return False
-        else:
-            return True
-
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            include_schemas=True,
-            version_table_schema=schema,
-            include_object=include_object,
-            process_revision_directives=process_revision_directives,
-            **current_app.extensions['migrate'].configure_args
-        )
+with connectable.connect() as connection:
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_schemas=True,
+        version_table_schema=schema,
+        include_object=include_object,
+        process_revision_directives=process_revision_directives,
+        **current_app.extensions['migrate'].configure_args
+    )
+```

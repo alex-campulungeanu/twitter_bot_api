@@ -1,4 +1,9 @@
 import os
+import sys
+from colorama import init
+from termcolor import colored
+
+init()
 
 ##The enviroments needs to be loaded first !!!
 from pathlib import Path
@@ -7,14 +12,15 @@ env_name = os.getenv('FLASK_ENV')
 if env_name == 'production':
     env_path = Path('.') / '.env.production'
 elif env_name == 'development':
-    env_path = Path('.') / '.env.development'
+    env_path = Path('.') / '.env'
 else:
-    env_path = Path('.') / '.env.development'
+    sys.exit(colored('FLASK_ENV accepted values are: production / development', 'red'))
 
 load_dotenv(dotenv_path=env_path, verbose=True)
 
 
 from flask import Flask
+from flask_cors import CORS
 
 from app.config import app_config, setup_logger
 from flask_migrate import Migrate
@@ -25,9 +31,15 @@ mail = Mail()
 
 # basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
+CORS(app) ## enable CORS on all routes
 app.config.from_object(app_config[env_name])
 
-app.logger.info(f"Run app with env:  {env_name}")
+app.logger.info(f"\n \
+######################################################### \n \
+#   ENV:        {env_name}                                \n \
+#   DB_HOST:    {app.config['DB_HOST']}                   \n \
+#   ENV:        {env_name}                                \n \
+######################################################### ")
 
 # Set up extensions
 from app.models import db, ma

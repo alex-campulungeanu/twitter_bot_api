@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 from logging.handlers import RotatingFileHandler
+from termcolor import colored
 
 from flask_sqlalchemy import get_debug_queries
 
@@ -18,9 +19,10 @@ class BaseConfig(object):
     
     ## log config
     DEBUG = False
-    SHOW_CUSTOM_LOG = os.getenv('SHOW_LOG', False)
+    SHOW_CUSTOM_LOG = os.getenv('SHOW_LOG', True)
+    LOG_TO_FILE = os.getenv('LOG_TO_FILE', False)
     DEBUG_SQL = os.getenv('DEBUG_SQL', False)
-    LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(filename)s - LINE: %(lineno)d  - MSG: %(message)s"
+    LOGGING_FORMAT = "%(asctime)s - %(levelname)s - " + colored("%(filename)s", 'green') + " - " + colored('LINE: ', 'green') +  "%(lineno)d  - " + colored("%(message)s", 'red')
     LOG_FILE_NAME = "logs/applogs.log"
     LOGGING_LEVEL = logging.DEBUG
     
@@ -30,7 +32,6 @@ class BaseConfig(object):
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_HOST = os.getenv('DB_HOST')
     DB_NAME = os.getenv('DB_NAME')
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=DB_USER,pw=DB_PASSWORD,url=DB_HOST,db=DB_NAME)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False #show query to console
     
@@ -48,13 +49,21 @@ class BaseConfig(object):
     TWITTER_API_SECRET_KEY=os.getenv('TWITTER_API_SECRET_KEY')
     TWITTER_ACCESS_TOKEN=os.getenv('TWITTER_ACCESS_TOKEN')
     TWITTER_ACCESS_TOKEN_SECRET=os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
-    TWITTER_HASTAGS_NR = 6
+    TWITTER_HASTAGS_NR = 8
     TWITTER_TWEET_LEN = 280
     LAST_REPLIES_CHECKED = 10
+
+    def __init__(self):
+        self.SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=self.DB_USER,pw=self.DB_PASSWORD,url=self.DB_HOST,db=self.DB_NAME)
 
 class Development(BaseConfig):
     """ Development environment configuration """
     DEBUG = True
+
+class DevelopmentDocker(BaseConfig):
+    """ Development environment configuration """
+    DEBUG = True
+    DB_HOST = 'host.docker.internal' # ovveride to acces database from localhost
 
 class Production(BaseConfig):
     """ Production environment configurations """
@@ -66,10 +75,11 @@ class Testing(BaseConfig):
     TESTING = True
 
 app_config = {
-    'development': Development,
-    'production': Production,
-    'testing': Testing,
-    'default': Development
+    'development': Development(),
+    'development.docker': DevelopmentDocker(),
+    'production': Production(),
+    'testing': Testing(),
+    'default': Development()
 }
 
 def setup_logger(app):
@@ -78,10 +88,13 @@ def setup_logger(app):
             os.mkdir('logs')
         formatter = logging.Formatter(app.config["LOGGING_FORMAT"])
         ## file logging
-        file_handler = RotatingFileHandler(app.config["LOG_FILE_NAME"], maxBytes=10240, backupCount=1)
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.DEBUG)
-        app.logger.addHandler(file_handler)
+        if app.config['LOG_TO_FILE'] is True:
+            if not os.path.exists('logs'):
+                os.mkdir('logs')
+            file_handler = RotatingFileHandler(app.config["LOG_FILE_NAME"], maxBytes=10240, backupCount=1)
+            file_handler.setFormatter(formatter)
+            file_handler.setLevel(logging.DEBUG)
+            app.logger.addHandler(file_handler)
         ## console logging
         from flask.logging import default_handler
         app.logger.removeHandler(default_handler) ##removing Default Handler
@@ -106,6 +119,5 @@ def setup_logger(app):
         print(query_str.rstrip('\n'))
         print('=' * 80 + '\n')
         return response
-
-    if app.config['DEBUG_SQL'] == True:
+    if app.config['DEBUG_SQL'] is True: ## don't use app.config['DEBUG_SQL'] == True or simple if app.config['DEBUG_SQL'] 
         app.after_request(sql_debug)

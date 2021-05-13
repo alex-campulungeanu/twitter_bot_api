@@ -9,4 +9,4 @@
 from app import app
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0') ## to run server with python run.py

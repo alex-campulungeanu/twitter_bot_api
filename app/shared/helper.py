@@ -5,8 +5,6 @@ import hashlib
 import uuid
 import time
 
-from flask import Response
-
 from app.constants.stop_words_list import english_stop_words
 
 ## files

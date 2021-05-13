@@ -19,4 +19,7 @@ from .PermissionModel import PermissionModel
 from .PostTypeModel import PostTypeModel
 from .PlatformModel import PlatformModel
 from .PlatformConfigModel import PlatformConfigModel
+from .TwitterFollowersModel import TwitterFollowersModel
+from .QuoteModel import QuoteModel
+from .ApiLogModel import ApiLogModel
 

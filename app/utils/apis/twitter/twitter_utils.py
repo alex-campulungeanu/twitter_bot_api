@@ -1,7 +1,8 @@
 from app.shared.helper import generate_hastags
+from app import app
 
 def sanitize_tweet(tweet, tw_length=280, suffix='...'):
-    tw_hastags = tweet + "\n" + ' '.join(generate_hastags(tweet, 6))
+    tw_hastags = tweet + "\n" + ' '.join(generate_hastags(tweet, app.config["TWITTER_HASTAGS_NR"]))
     if len(tw_hastags) <= tw_length:
         return tw_hastags
     else:

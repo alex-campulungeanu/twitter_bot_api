@@ -62,7 +62,8 @@ def configure_db():
             PermissionModel(id=1, name='createPost', description='add posts'),
             PermissionModel(id=2, name='viewPost', description='view posts'),
             PermissionModel(id=3, name='deletePost', description='delete posts'),
-            PermissionModel(id=4, name='publishTwitterPost', description='publish twitter posts')
+            PermissionModel(id=4, name='publishTwitterPost', description='publish twitter posts'),
+            PermissionModel(id=5, name='administration', description='performa administration tasks')
         ]
         add_rows(permissions)
         current_app.logger.info('Permission  added')

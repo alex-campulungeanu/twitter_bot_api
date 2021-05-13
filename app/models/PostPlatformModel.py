@@ -17,5 +17,6 @@ class PostPlatformModel(db.Model):
     platform_id = db.Column(db.Integer, db.ForeignKey(cfg_db_schema + '.platform.id'), primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     error = db.Column(db.Integer, default=0)
+    error_msg = db.Column(db.Text, default='')
     post = db.relationship("PostModel", back_populates="platform")
     platform = db.relationship("PlatformModel", back_populates="posts")
